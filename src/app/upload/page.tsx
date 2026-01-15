@@ -586,8 +586,6 @@ export default function UploadPage() {
             </div>
         </div>
 
-
-
         {/* Fullscreen Image Modal */ }
     {
         isFullscreen && preview && file?.type.startsWith('image/') && (
