@@ -585,28 +585,5 @@ export default function UploadPage() {
                 )}
             </div>
         </div>
-
-        {/* Fullscreen Image Modal */ }
-    {
-        isFullscreen && preview && file?.type.startsWith('image/') && (
-            <div
-                className="fixed inset-0 z-50 bg-black flex items-center justify-center p-4"
-                onClick={() => setIsFullscreen(false)}
-            >
-                <button
-                    className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 z-10"
-                    onClick={() => setIsFullscreen(false)}
-                >
-                    <X className="h-6 w-6" />
-                </button>
-                <img
-                    src={preview}
-                    alt="Fullscreen Preview"
-                    className="max-w-full max-h-full object-contain"
-                    style={{ touchAction: 'pinch-zoom' }}
-                />
-            </div>
-        )
-    }
     );
 }
