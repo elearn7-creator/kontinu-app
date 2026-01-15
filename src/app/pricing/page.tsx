@@ -12,8 +12,6 @@ import { ArrowLeft, Check, Loader2, Sparkles, Zap } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { Navbar } from '@/components/navbar';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 const plans = [
     {
