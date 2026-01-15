@@ -12,7 +12,7 @@ const AnimatedBalance = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const change = (Math.random() - 0.5) * 200; // Random change between -100 and +100
+      const change = (Math.random() - 0.5) * 1000; // Random change between -100 and +100
       setBalance(prev => prev + change);
     }, 2000);
     return () => clearInterval(interval);
@@ -133,7 +133,7 @@ export default function HomePage() {
               <img src="https://i.pravatar.cc/100?img=33" alt="User" />
             </div>
             <div>
-              <div className="text-sm font-bold">James Smith</div>
+              <div className="text-sm font-bold">Income</div>
               <div className="text-xs text-lime-400">+$357.0</div>
             </div>
           </motion.div>
@@ -147,7 +147,7 @@ export default function HomePage() {
               <img src="https://i.pravatar.cc/100?img=47" alt="User" />
             </div>
             <div>
-              <div className="text-sm font-bold">Sonia Salieva</div>
+              <div className="text-sm font-bold">Income</div>
               <div className="text-xs text-lime-400">+$1,980.0</div>
             </div>
           </motion.div>
@@ -172,20 +172,9 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-12">
           <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-50">
             {/* Simulated Logos */}
-            <span className="text-2xl font-bold font-serif text-white hover:text-lime-400 transition-colors cursor-pointer">Evernote</span>
-            <span className="text-2xl font-bold font-sans tracking-tight text-white hover:text-lime-400 transition-colors cursor-pointer flex items-center gap-1">
-              <span className="text-3xl">▲</span> Adobe
-            </span>
-            <span className="text-2xl font-bold font-sans italic text-white hover:text-lime-400 transition-colors cursor-pointer">PayPal</span>
-            <span className="text-2xl font-bold font-sans text-white hover:text-lime-400 transition-colors cursor-pointer">amazon</span>
-            <span className="text-2xl font-bold font-mono text-white hover:text-lime-400 transition-colors cursor-pointer flex items-center gap-2">
-              <div className="flex gap-0.5">
-                <div className="w-2 h-2 rounded-full bg-current" />
-                <div className="w-2 h-2 rounded-full bg-current" />
-                <div className="w-2 h-2 rounded-full bg-current" />
-              </div>
-              asana
-            </span>
+            <span className="text-2xl font-bold font-serif text-white hover:text-lime-400 transition-colors cursor-pointer">Kopi Tiam Lim</span>
+            <span className="text-2xl font-bold font-sans italic text-white hover:text-lime-400 transition-colors cursor-pointer">WIN Supplies</span>
+            <span className="text-2xl font-bold font-sans text-white hover:text-lime-400 transition-colors cursor-pointer">Thed-X</span>
           </div>
         </div>
       </div>
