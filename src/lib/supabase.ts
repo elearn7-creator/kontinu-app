@@ -31,5 +31,9 @@ export interface Transaction {
     category?: string;
     notes?: string;
     file_url?: string;
+    items?: any[];
+    invoice_number?: string;
+    type?: string;
+    outlet?: string;
     created_at: string;
 }

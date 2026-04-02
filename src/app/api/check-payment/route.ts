@@ -72,35 +72,28 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Update User
-        // Determine credits based on plan (metadata or amount)
-        // Since we didn't store plan in external_id securely, we trust the metadata or infer from amount
-        // But metadata might not be searchable.
-        // Let's use amount.
-        let addedCredits = 0;
-        let planName = 'unknown';
-
-        if (userInvoice.amount === 10000) {
-            addedCredits = 100;
-            planName = 'bronze';
-        } else if (userInvoice.amount === 25000) {
-            addedCredits = 300;
-            planName = 'silver';
-        } else if (userInvoice.amount === 45000) {
-            addedCredits = 600;
-            planName = 'gold';
+        // Extract planCode from external_id
+        // Format: kontinu-{userId}-{planCode}-{timestamp}
+        const parts = userInvoice.external_id.split('-');
+        let planCode = 'bronze'; // Default fallback
+        if (parts.length >= 4) {
+            planCode = parts[parts.length - 2];
         }
 
-        // Reset usage count on new subscription? Or just add credits?
-        // Usually reset usage, set credits to plan limit.
+        const creditsMap: Record<string, number> = {
+            bronze: 100,
+            silver: 250,
+            gold: 500,
+        };
 
-        // ... existing update logic ...
+        const addedCredits = creditsMap[planCode] || 100;
 
         await supabase
             .from('users')
             .update({
                 credits: addedCredits,
                 usage_count: 0,
-                subscription_status: planName,
+                subscription_status: planCode,
                 subscription_end: expectedEnd.toISOString(),
                 updated_at: new Date().toISOString(),
             })
@@ -112,7 +105,7 @@ export async function POST(req: NextRequest) {
             .insert({
                 user_id: user.id,
                 amount: userInvoice.amount,
-                plan: planName,
+                plan: planCode,
                 status: 'PAID',
                 external_id: userInvoice.external_id,
                 payment_method: 'XENDIT',
@@ -134,7 +127,7 @@ export async function POST(req: NextRequest) {
             await n8nService.triggerInvoice({
                 email: userEmail,
                 name: `User ${userId}`,
-                plan: planName,
+                plan: planCode,
                 amount: userInvoice.amount,
                 date: new Date().toISOString(),
                 paymentId: paymentRecord?.id || userInvoice.external_id
@@ -145,7 +138,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `Upgraded to ${planName}`,
+            message: `Upgraded to ${planCode}`,
             credits: addedCredits
         });
 

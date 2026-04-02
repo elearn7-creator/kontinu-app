@@ -231,21 +231,6 @@ export default function UploadPage() {
                 payload.credit = formData.amount;
             }
 
-            const { error: dbError } = await supabase
-                .from('transactions')
-                .insert({
-                    user_id: userData.id,
-                    amount: formData.amount,
-                    vendor: formData.vendor,
-                    date: formData.date,
-                    category: formData.category || (transactionType === 'income' ? 'Income' : 'Expense'),
-                    notes: formData.notes,
-                });
-
-            if (dbError) {
-                console.error('Supabase DB Insert Error:', dbError);
-            }
-
             const response = await n8nService.saveEntry(payload);
 
             if (response.success) {

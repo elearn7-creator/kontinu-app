@@ -37,12 +37,17 @@ CREATE TABLE transactions (
   category TEXT,
   notes TEXT,
   file_url TEXT,
+  items JSONB,
+  invoice_number TEXT,
+  type TEXT,
+  outlet TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Index for faster queries
 CREATE INDEX idx_transactions_user_id ON transactions(user_id);
 CREATE INDEX idx_transactions_date ON transactions(date);
+CREATE INDEX idx_transactions_type ON transactions(type);
 ```
 
 ### payments
