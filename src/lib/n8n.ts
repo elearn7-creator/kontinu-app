@@ -156,12 +156,12 @@ export const n8nService = {
                 body: formData
             });
 
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(text || `HTTP error! status: ${response.status}`);
+            const result = await response.json();
+
+            if (!response.ok || result.success === false) {
+                throw new Error(result.error || result.message || `Server Error: ${response.status}`);
             }
 
-            const result = await response.json();
             return result;
         } catch (error: any) {
             console.error('Save Entry Error:', error);

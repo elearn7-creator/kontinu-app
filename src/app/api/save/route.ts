@@ -8,7 +8,8 @@ export async function POST(request: Request) {
 
         // 1. Extract and Save to Supabase (Primary Database)
         const userId = formData.get('userId') as string;
-        const amount = parseFloat(formData.get('amount') as string);
+        const amountStr = formData.get('amount') as string;
+        const amount = parseFloat(amountStr);
         const vendor = formData.get('vendor') as string;
         const date = formData.get('date') as string;
         const category = formData.get('category') as string;
@@ -18,6 +19,17 @@ export async function POST(request: Request) {
         const type = formData.get('type') as string;
         const outlet = formData.get('outlet') as string;
 
+        console.log('--- Save API Request ---');
+        console.log('UserID:', userId);
+        console.log('Amount:', amount, '(from:', amountStr, ')');
+        console.log('Vendor:', vendor);
+        console.log('Date:', date);
+
+        if (isNaN(amount)) {
+            console.error('Invalid amount received:', amountStr);
+            return NextResponse.json({ success: false, error: 'Invalid amount value' }, { status: 400 });
+        }
+
         let items: any[] = [];
         try {
             if (itemsRaw) items = JSON.parse(itemsRaw);
@@ -25,37 +37,52 @@ export async function POST(request: Request) {
             console.warn('Failed to parse items from formData');
         }
 
-        if (userId) {
-            // Get internal user ID from clerk_id
-            const { data: userData } = await supabase
-                .from('users')
-                .select('id')
-                .eq('clerk_id', userId)
-                .single();
-
-            if (userData) {
-                const { error: dbError } = await supabase
-                    .from('transactions')
-                    .insert({
-                        user_id: userData.id,
-                        amount,
-                        vendor,
-                        date,
-                        category: category || (type === 'income' ? 'Income' : 'Expense'),
-                        notes,
-                        items,
-                        invoice_number: invoiceNumber,
-                        type,
-                        outlet
-                    });
-
-                if (dbError) {
-                    console.error('Supabase DB Insert Error (API Route):', dbError);
-                } else {
-                    console.log('✅ Transaction saved to Supabase');
-                }
-            }
+        if (!userId) {
+            return NextResponse.json({ success: false, error: 'Missing userId' }, { status: 400 });
         }
+
+        // 1. Extract and Save to Supabase (Primary Database)
+        // Get internal user ID from clerk_id
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('clerk_id', userId)
+            .single();
+
+        if (userError || !userData) {
+            console.error('User not found in Supabase:', userId, userError);
+            return NextResponse.json({
+                success: false,
+                error: 'Account record not found. Please complete onboarding or refresh.',
+                details: userError?.message
+            }, { status: 404 });
+        }
+
+        const { error: dbError } = await supabase
+            .from('transactions')
+            .insert({
+                user_id: userData.id,
+                amount,
+                vendor,
+                date,
+                category: category || (type === 'income' ? 'Income' : 'Expense'),
+                notes,
+                items,
+                invoice_number: invoiceNumber,
+                type,
+                outlet
+            });
+
+        if (dbError) {
+            console.error('Supabase DB Insert Error:', dbError);
+            return NextResponse.json({
+                success: false,
+                error: 'Database save failed',
+                details: dbError.message
+            }, { status: 500 });
+        }
+
+        console.log('✅ Transaction saved to Supabase');
 
         // 2. Forward to n8n (Backup/Sheets Integration)
         if (!n8nUrl) {

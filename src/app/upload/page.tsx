@@ -197,16 +197,23 @@ export default function UploadPage() {
         setSaving(true);
 
         try {
-            const { data: userData } = await supabase
+            // 1. Check if user exists in Supabase
+            const { data: userData, error: userError } = await supabase
                 .from('users')
                 .select('id, sheet_id, drive_folder_id, business_name')
                 .eq('clerk_id', user.id)
                 .single();
 
-            // Setup check moved to OnboardingWizard
-            if (!userData?.sheet_id || !userData?.drive_folder_id) {
-                // Should be blocked by Wizard overlay, but double check
-                toast.error("Please complete account setup first.");
+            if (userError || !userData) {
+                console.error("User lookup error:", userError);
+                toast.error("Account record not found. Please complete setup first.");
+                setSaving(false);
+                return;
+            }
+
+            // 2. Setup check moved to OnboardingWizard
+            if (!userData.sheet_id || !userData.drive_folder_id) {
+                toast.error("Please complete account setup (Google Sheets/Drive) first.");
                 setSaving(false);
                 return;
             }
@@ -241,10 +248,10 @@ export default function UploadPage() {
                     description: response.error || 'Please try again',
                 });
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving entry:', error);
             toast.error('Error', {
-                description: 'Please try again later',
+                description: error.message || 'Please try again later',
             });
         } finally {
             setSaving(false);
