@@ -192,7 +192,11 @@ export default function UploadPage() {
     };
 
     const handleSave = async () => {
-        if (!user || !analyzed) return;
+        console.log('🔘 "Add Transaction" button clicked');
+        if (!user || !analyzed) {
+            console.log('⚠️ Save aborted: user or analyzed state missing', { user: !!user, analyzed });
+            return;
+        }
 
         setSaving(true);
 
@@ -238,18 +242,21 @@ export default function UploadPage() {
                 payload.credit = formData.amount;
             }
 
+            console.log('🚀 Saving Transaction Payload:', payload);
             const response = await n8nService.saveEntry(payload);
+            console.log('📥 Save API Response:', response);
 
             if (response.success) {
                 toast.success('Transaction Added!');
                 router.push('/dashboard');
             } else {
+                console.error('❌ Save Failed:', response.error, response);
                 toast.error('Failed to save', {
                     description: response.error || 'Please try again',
                 });
             }
         } catch (error: any) {
-            console.error('Error saving entry:', error);
+            console.error('🛑 Save Catch Error:', error);
             toast.error('Error', {
                 description: error.message || 'Please try again later',
             });
