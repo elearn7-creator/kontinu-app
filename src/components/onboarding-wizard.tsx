@@ -45,7 +45,7 @@ export function OnboardingWizard({ userId, email, onSuccess, open }: OnboardingW
                     business_address: address,
                     mobile_phone: phone,
                     // Ensure defaults for new rows if they were deleted
-                    credits: 10,
+                    credits: 5,
                     usage_count: 0,
                     subscription_status: 'trial',
                     trial_start: new Date().toISOString(),

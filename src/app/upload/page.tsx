@@ -10,6 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from '@/components/ui/dialog';
+import {
     Camera,
     Upload as UploadIcon,
     FileText,
@@ -24,6 +32,7 @@ import {
     RotateCcw
 } from 'lucide-react';
 import Link from 'next/link';
+import { FloatingUploadBtn } from '@/components/floating-upload-btn';
 import { n8nService, AnalyzedItem } from '@/lib/n8n';
 import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/components/language-provider';
@@ -57,6 +66,7 @@ export default function UploadPage() {
     const [zoom, setZoom] = useState(1);
     const [userData, setUserData] = useState<any | null>(null); // Use 'any' or import User type
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showOutOfCredits, setShowOutOfCredits] = useState(false);
 
     // Fetch User Data
     useEffect(() => {
@@ -135,7 +145,13 @@ export default function UploadPage() {
     const handleResetZoom = () => setZoom(1);
 
     const handleAnalyze = async () => {
-        if (!file || !user) return;
+        if (!file || !user || !userData) return;
+
+        // Check Credits
+        if (userData.usage_count >= userData.credits) {
+            setShowOutOfCredits(true);
+            return;
+        }
 
         setAnalyzing(true);
 
@@ -583,6 +599,38 @@ export default function UploadPage() {
                     </div>
                 )}
             </div>
+            {/* Floating Action Button */}
+            <FloatingUploadBtn />
+
+            {/* Out of Credits Modal */}
+            <Dialog open={showOutOfCredits} onOpenChange={setShowOutOfCredits}>
+                <DialogContent className="bg-[#1a1a1a] text-white border-white/10 max-w-sm">
+                    <DialogHeader className="items-center text-center">
+                        <div className="h-16 w-16 bg-lime-400/10 rounded-full flex items-center justify-center mb-4">
+                            <Sparkles className="h-8 w-8 text-lime-400" />
+                        </div>
+                        <DialogTitle className="text-xl">Out of Credits</DialogTitle>
+                        <DialogDescription className="text-gray-400">
+                            You have reached your free trial limit of 5 transactions. Upgrade to continue automating your bookkeeping.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex flex-col gap-2 sm:gap-0 mt-4">
+                        <Button 
+                            onClick={() => router.push('/billing')}
+                            className="w-full bg-lime-400 text-black hover:bg-lime-500 font-bold"
+                        >
+                            Upgrade Now
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            onClick={() => setShowOutOfCredits(false)}
+                            className="w-full text-gray-400 hover:text-white"
+                        >
+                            Maybe Later
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
