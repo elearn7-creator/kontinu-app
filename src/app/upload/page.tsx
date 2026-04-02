@@ -177,17 +177,15 @@ export default function UploadPage() {
                     setTransactionType('income');
                 }
 
-                const { data: userData } = await supabase
-                    .from('users')
-                    .select('usage_count, credits')
-                    .eq('clerk_id', user.id)
-                    .single();
-
                 if (userData) {
+                    const newUsageCount = userData.usage_count + 1;
                     await supabase
                         .from('users')
-                        .update({ usage_count: userData.usage_count + 1 })
+                        .update({ usage_count: newUsageCount })
                         .eq('clerk_id', user.id);
+                    
+                    // IMPORTANT: Update local state so next upload knows user is out of credits
+                    setUserData((prev: any) => ({ ...prev, usage_count: newUsageCount }));
                 }
 
                 setAnalyzed(true);
@@ -404,10 +402,10 @@ export default function UploadPage() {
 
                                         <Button
                                             size="icon"
-                                            className="bg-lime-400 hover:bg-lime-500 text-black h-9 w-9"
+                                            className={`${userData.usage_count >= userData.credits ? 'bg-gray-500 cursor-not-allowed' : 'bg-lime-400 hover:bg-lime-500'} text-black h-9 w-9`}
                                             onClick={handleAnalyze}
-                                            disabled={analyzing}
-                                            title={t('analyze_ai')}
+                                            disabled={analyzing || userData.usage_count >= userData.credits}
+                                            title={userData.usage_count >= userData.credits ? 'Out of Credits' : t('analyze_ai')}
                                         >
                                             {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                                         </Button>
